@@ -28,7 +28,8 @@ import { ActivityLogTab } from './tabs/ActivityLogTab';
 import { RunbooksTab } from './tabs/RunbooksTab';
 import { WebhooksTab } from './tabs/WebhooksTab';
 import { Badge, StaleIndicator } from './ui';
-import { ExternalHref } from './ExternalLink';
+import { ExternalHref, PlatformLink } from './ExternalLink';
+import { GitHubDeployButton } from './GitHubDeployButton';
 
 type Props = {
   slug: string;
@@ -213,6 +214,28 @@ export function ProjectView({ slug, activeTab, onTabChange, onDeleted, onRegiste
         if (newDocker.length > 0) summary.push(`${newDocker.length} Docker configs`);
       }
 
+      if (results.infisical_refs?.length) {
+        const existingInfi = new Set(scope.infisical_refs.map(r =>
+          `${r.infisical_project_id}:${r.environment}:${r.secret_path}`,
+        ));
+        const newInfi = results.infisical_refs.filter(r =>
+          !existingInfi.has(`${r.infisical_project_id}:${r.environment}:${r.secret_path}`),
+        );
+        for (const inf of newInfi) {
+          await upsertRow('infisical_refs', {
+            project_id: scope.project.id,
+            infisical_project_id: inf.infisical_project_id,
+            workspace_name: '',
+            environment: inf.environment,
+            secret_path: inf.secret_path,
+            run_command_pattern: inf.run_command_pattern,
+            notes: inf.notes || 'auto-detected',
+          });
+          addedCount++;
+        }
+        if (newInfi.length > 0) summary.push(`${newInfi.length} Infisical refs`);
+      }
+
       // Refresh the scope
       await load();
 
@@ -271,12 +294,21 @@ export function ProjectView({ slug, activeTab, onTabChange, onDeleted, onRegiste
           <div className="flex items-center gap-3 mb-1 flex-wrap">
             <h2 className="text-lg font-semibold text-slate-100">{scope.project.name || scope.project.slug}</h2>
             <Badge tone="emerald">{scope.project.status}</Badge>
-            {scope.project.hosting_platform && <Badge tone="blue">{scope.project.hosting_platform}</Badge>}
+            {scope.project.hosting_platform && (
+              <PlatformLink
+                platform={scope.project.hosting_platform}
+                deployments={scope.deployments}
+                urls={scope.urls}
+                label={`${scope.project.hosting_platform} ↗`}
+                className="text-xs font-medium text-blue-400 hover:text-blue-300 hover:underline capitalize"
+              />
+            )}
             {scope.project.repo_url && (
               <ExternalHref href={scope.project.repo_url} className="text-xs font-medium">
                 Repository ↗
               </ExternalHref>
             )}
+            <GitHubDeployButton scope={scope} compact onDeployed={load} />
             {cachedAt && <StaleIndicator cachedAt={cachedAt} />}
             {daemonOnline && effectivePath && (
               <button

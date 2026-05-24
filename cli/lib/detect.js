@@ -409,6 +409,26 @@ function scanSubPkg(dir, relPath, pm, seenPorts, seenKeys, vercelProjectList) {
   return { cmds, ports, envKeys, docker, deployments };
 }
 
+function readInfisicalConfig(cwd) {
+  const raw = readText(join(cwd, '.infisical.json'));
+  if (!raw) return null;
+  try {
+    const cfg = JSON.parse(raw);
+    const projectId = cfg.workspaceId || cfg.projectId || cfg.workspace_id || cfg.project_id || '';
+    if (!projectId) return null;
+    const env = cfg.defaultEnvironment || cfg.default_environment || 'dev';
+    return {
+      infisical_project_id: projectId,
+      environment: env,
+      secret_path: '/',
+      run_command_pattern: `infisical run --env=${env} --path=/ -- `,
+      notes: 'imported from .infisical.json',
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ── Main detect function ───────────────────────────────────────────────────
 export async function detect(cwd) {
   const result = {
@@ -419,6 +439,7 @@ export async function detect(cwd) {
     deployments: [],
     env_keys: [],
     docker: [],
+    infisical_refs: [],
   };
 
   // ── Vercel CLI: fetch project list once (used for root + all sub-packages) ─
@@ -430,6 +451,9 @@ export async function detect(cwd) {
   else if (existsSync(join(cwd, 'bun.lockb'))) pm = 'bun';
   else if (existsSync(join(cwd, 'yarn.lock'))) pm = 'yarn';
   result.project.package_manager = pm;
+
+  const infisical = readInfisicalConfig(cwd);
+  if (infisical) result.infisical_refs.push(infisical);
 
   // ── package.json ─────────────────────────────────────────────────────────
   let pkg = {};

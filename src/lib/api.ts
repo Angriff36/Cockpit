@@ -808,7 +808,7 @@ export async function signInWithGitHub(): Promise<void> {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      scopes: 'read:user repo',
+      scopes: 'read:user repo workflow',
       redirectTo: window.location.origin,
     },
   });

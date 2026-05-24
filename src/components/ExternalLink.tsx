@@ -1,6 +1,8 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react';
 import { isClickableUrl, resolveHref } from '../lib/externalLink';
+import { resolveHostingUrl } from '../lib/hostingLink';
+import type { DeploymentTarget, ProjectUrl } from '../lib/types';
 import { Field, Input } from './ui';
 
 type ExternalHrefProps = {
@@ -93,5 +95,36 @@ export function UrlField({
         />
       )}
     </Field>
+  );
+}
+
+export function PlatformLink({
+  platform,
+  deployments = [],
+  urls = [],
+  label,
+  className = '',
+}: {
+  platform: string;
+  deployments?: DeploymentTarget[];
+  urls?: ProjectUrl[];
+  label?: string;
+  className?: string;
+}) {
+  const href = resolveHostingUrl({ hosting_platform: platform }, deployments, urls);
+  const text = label ?? platform;
+  if (!href) return <span className={className}>{text}</span>;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={href}
+      className={`hover:opacity-90 transition-opacity ${className}`}
+      onClick={e => e.stopPropagation()}
+    >
+      {text}
+    </a>
   );
 }

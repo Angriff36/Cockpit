@@ -1,5 +1,5 @@
 import { getGitHubToken } from './api';
-import type { GitHubIssue, GitHubPullRequest, GitHubRepoStatus, GitHubWorkflowRun } from './types';
+import type { GitHubIssue, GitHubPullRequest, GitHubRepoStatus, GitHubWorkflow, GitHubWorkflowRun } from './types';
 
 const GITHUB_API = 'https://api.github.com';
 
@@ -328,4 +328,136 @@ export async function fetchOpenPullRequests(
   }));
 
   return { pullRequests, totalCount: json.total_count ?? 0 };
+}
+
+// ── Workflow dispatch (deploy via GitHub Actions) ─────────────────────────
+
+export async function fetchRepoWorkflows(repoUrl: string): Promise<GitHubWorkflow[]> {
+  const parsed = parseOwnerRepo(repoUrl);
+  if (!parsed) return [];
+
+  const token = await getGitHubToken();
+  if (!token?.access_token) throw new Error('GitHub not connected. Connect via the sidebar.');
+
+  const data = await ghFetch<{ workflows: Array<{ id: number; name: string; path: string; state: string }> }>(
+    `/repos/${parsed.owner}/${parsed.repo}/actions/workflows?per_page=100`,
+    token.access_token,
+  );
+
+  return (data.workflows || [])
+    .filter(w => w.state === 'active')
+    .map(w => ({ id: w.id, name: w.name, path: w.path, state: w.state }));
+}
+
+export function pickDeployWorkflow(
+  workflows: GitHubWorkflow[],
+  hints: { platform?: string; workflowFile?: string } = {},
+): GitHubWorkflow | null {
+  if (hints.workflowFile?.trim()) {
+    const file = hints.workflowFile.trim().replace(/^\//, '');
+    const match = workflows.find(w =>
+      w.path === file
+      || w.path.endsWith(`/${file}`)
+      || w.path === `.github/workflows/${file}`,
+    );
+    if (match) return match;
+  }
+
+  const scored = workflows
+    .map(w => {
+      const hay = `${w.name} ${w.path}`.toLowerCase();
+      let score = 0;
+      if (hints.platform === 'vercel' && hay.includes('vercel')) score += 20;
+      if (hay.includes('deploy')) score += 10;
+      if (hay.includes('production') || hay.includes('prod')) score += 8;
+      if (hay.includes('preview')) score -= 5;
+      if (hay.includes('test') || hay.includes('ci')) score -= 3;
+      return { w, score };
+    })
+    .filter(x => x.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return scored[0]?.w ?? null;
+}
+
+export async function dispatchWorkflow(
+  repoUrl: string,
+  workflowId: number,
+  ref: string,
+  inputs: Record<string, string> = {},
+): Promise<void> {
+  const parsed = parseOwnerRepo(repoUrl);
+  if (!parsed) throw new Error('Not a GitHub repository URL');
+
+  const token = await getGitHubToken();
+  if (!token?.access_token) throw new Error('GitHub not connected. Connect via the sidebar.');
+
+  const res = await fetch(
+    `${GITHUB_API}/repos/${parsed.owner}/${parsed.repo}/actions/workflows/${workflowId}/dispatches`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref, inputs }),
+    },
+  );
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    if (res.status === 422) {
+      throw new Error(
+        'This workflow cannot be dispatched. Add workflow_dispatch to .github/workflows/your-file.yml.',
+      );
+    }
+    if (res.status === 403) {
+      throw new Error('GitHub token lacks workflow permission. Reconnect GitHub with repo + workflow scopes.');
+    }
+    throw new Error(`GitHub Actions dispatch failed (${res.status}): ${body.slice(0, 200)}`);
+  }
+}
+
+export async function fetchLatestWorkflowRunForWorkflow(
+  repoUrl: string,
+  workflowId: number,
+  branch?: string,
+): Promise<GitHubWorkflowRun | null> {
+  const parsed = parseOwnerRepo(repoUrl);
+  if (!parsed) return null;
+
+  const token = await getGitHubToken();
+  if (!token?.access_token) return null;
+
+  const params = new URLSearchParams({ per_page: '5' });
+  if (branch) params.set('branch', branch);
+
+  const data = await ghFetch<{ workflow_runs: GitHubWorkflowRun[] }>(
+    `/repos/${parsed.owner}/${parsed.repo}/actions/workflows/${workflowId}/runs?${params}`,
+    token.access_token,
+  );
+
+  return data.workflow_runs?.[0] ?? null;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export async function waitForDispatchedRun(
+  repoUrl: string,
+  workflowId: number,
+  branch: string,
+  dispatchedAfter: Date,
+  timeoutMs = 30000,
+): Promise<GitHubWorkflowRun | null> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await sleep(2000);
+    const run = await fetchLatestWorkflowRunForWorkflow(repoUrl, workflowId, branch);
+    if (run && new Date(run.created_at) >= dispatchedAfter) return run;
+  }
+  return null;
 }

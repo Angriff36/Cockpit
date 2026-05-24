@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2, Eye, EyeOff, KeyRound, ShieldAlert, Zap, GitCompareArrows, AlertTriangle, FileQuestion, Loader2, CheckCircle2, XCircle, HelpCircle, RefreshCw } from 'lucide-react';
 import type { ProjectScope, EnvKey, InfisicalRef } from '../../lib/types';
 import { upsertRow, deleteRow, getEffectiveRepoPath } from '../../lib/api';
@@ -14,16 +14,39 @@ const SOURCES = ['infisical', 'vercel-env', '.env', '.env.local', '.env.example'
 function InfisicalRefRow({ i: initial, onSave, onRemove }: { i: InfisicalRef; onSave: (i: InfisicalRef) => void; onRemove: (id: string) => void }) {
   const [i, setI] = useState(initial);
 
+  useEffect(() => {
+    setI(initial);
+  }, [initial]);
+
+  const isDirty = i.infisical_project_id !== initial.infisical_project_id ||
+                  i.workspace_name !== initial.workspace_name ||
+                  i.environment !== initial.environment ||
+                  i.secret_path !== initial.secret_path ||
+                  i.run_command_pattern !== initial.run_command_pattern;
+
   function save() { onSave(i); }
 
   return (
     <div className="bg-slate-950 border border-slate-800 rounded p-4 grid grid-cols-12 gap-3">
-      <div className="col-span-4"><Field label="Infisical project ID"><Input className="font-mono" value={i.infisical_project_id} onChange={e => setI({ ...i, infisical_project_id: e.target.value })} onBlur={save} /></Field></div>
-      <div className="col-span-4"><Field label="Workspace name"><Input value={i.workspace_name} onChange={e => setI({ ...i, workspace_name: e.target.value })} onBlur={save} /></Field></div>
-      <div className="col-span-2"><Field label="Environment"><Input value={i.environment} onChange={e => setI({ ...i, environment: e.target.value })} onBlur={save} /></Field></div>
-      <div className="col-span-2"><Field label="Secret path"><Input className="font-mono" value={i.secret_path} onChange={e => setI({ ...i, secret_path: e.target.value })} onBlur={save} /></Field></div>
+      <div className="col-span-4">
+        <Field label="Infisical project ID">
+          <Input className="font-mono" value={i.infisical_project_id} onChange={e => setI({ ...i, infisical_project_id: e.target.value })} onBlur={save} placeholder="UUID from Infisical" />
+        </Field>
+      </div>
+      <div className="col-span-4">
+        <Field label="Label">
+          <Input value={i.workspace_name} onChange={e => setI({ ...i, workspace_name: e.target.value })} onBlur={save} placeholder="e.g. API secrets" />
+        </Field>
+      </div>
+      <div className="col-span-2"><Field label="Environment"><Input value={i.environment} onChange={e => setI({ ...i, environment: e.target.value })} onBlur={save} placeholder="dev" /></Field></div>
+      <div className="col-span-2"><Field label="Secret path"><Input className="font-mono" value={i.secret_path} onChange={e => setI({ ...i, secret_path: e.target.value })} onBlur={save} placeholder="/" /></Field></div>
       <div className="col-span-12"><Field label="Run command pattern"><Input className="font-mono" value={i.run_command_pattern} onChange={e => setI({ ...i, run_command_pattern: e.target.value })} onBlur={save} /></Field></div>
-      <div className="col-span-12 flex justify-end"><Button variant="danger" onClick={() => onRemove(i.id)}><Trash2 className="w-3 h-3" /></Button></div>
+      <div className="col-span-12 flex justify-end gap-2">
+        {isDirty && (
+          <Button onClick={save}>Save changes</Button>
+        )}
+        <Button variant="danger" onClick={() => onRemove(i.id)}><Trash2 className="w-3 h-3" /></Button>
+      </div>
     </div>
   );
 }
@@ -355,7 +378,7 @@ function InfisicalSyncPanel({ refs }: { refs: InfisicalRef[] }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <code className="text-xs font-mono text-slate-200 truncate">
-                        {ref.workspace_name || ref.infisical_project_id || 'unnamed'}
+                        {ref.workspace_name || (ref.infisical_project_id ? `${ref.infisical_project_id.slice(0, 8)}…` : 'unnamed')}
                       </code>
                       <span className="text-[11px] text-slate-500">{ref.environment}{ref.secret_path !== '/' ? ` ${ref.secret_path}` : ''}</span>
                     </div>
@@ -390,6 +413,42 @@ export function EnvTab({ scope, onChange }: { scope: ProjectScope; onChange: () 
   const repoPath = getEffectiveRepoPath(scope, currentMachine);
   const [reveal, setReveal] = useState(false);
   const [syncing, setSyncing] = useState(false);
+
+  async function importInfisicalFromRepo() {
+    if (!repoPath) return;
+    setSyncing(true);
+    try {
+      const detected = await detectProject(repoPath);
+      const ref = detected.infisical_refs?.[0];
+      if (!ref) {
+        alert('No .infisical.json found in the repo root.');
+        return;
+      }
+      const duplicate = scope.infisical_refs.some(r =>
+        r.infisical_project_id === ref.infisical_project_id
+        && r.environment === ref.environment
+        && r.secret_path === ref.secret_path,
+      );
+      if (duplicate) {
+        alert('Infisical reference already configured.');
+        return;
+      }
+      await upsertRow<InfisicalRef>('infisical_refs', {
+        project_id: scope.project.id,
+        infisical_project_id: ref.infisical_project_id,
+        workspace_name: '',
+        environment: ref.environment,
+        secret_path: ref.secret_path,
+        run_command_pattern: ref.run_command_pattern,
+        notes: ref.notes || 'imported from .infisical.json',
+      } as any);
+      onChange();
+    } catch (e: any) {
+      alert(`Import failed: ${e.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function syncFromDaemon() {
     if (!repoPath) return;
@@ -445,7 +504,21 @@ export function EnvTab({ scope, onChange }: { scope: ProjectScope; onChange: () 
       )}
 
       <Card>
-        <CardHeader title="Infisical references" action={<Button onClick={addInfi}><Plus className="w-3 h-3 inline mr-1" />Add</Button>} />
+        <CardHeader title="Infisical references" action={
+          <div className="flex gap-2">
+            {daemonOnline && repoPath && (
+              <Button variant="ghost" disabled={syncing} onClick={importInfisicalFromRepo} title="Read .infisical.json from repo">
+                <Zap className="w-3 h-3" />
+              </Button>
+            )}
+            <Button onClick={addInfi}><Plus className="w-3 h-3 inline mr-1" />Add</Button>
+          </div>
+        } />
+        <div className="px-5 pt-4 pb-0">
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Point at your Infisical project ID + environment. Use the ⚡ button to import from <span className="font-mono">.infisical.json</span> in the repo.
+          </p>
+        </div>
         <div className="p-5 space-y-3">
           {scope.infisical_refs.length === 0 && <div className="text-sm text-slate-500">No Infisical references.</div>}
           {scope.infisical_refs.map(i => (

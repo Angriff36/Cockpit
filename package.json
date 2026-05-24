@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "ldc": "./cli/ldc.js"
+  },
   "scripts": {
     "dev": "vite",
     "dev:full": "concurrently \"node cli/ldc.js daemon\" \"npm run dev\" --names \"daemon,vite\" --prefix-colors \"cyan,green\"",
@@ -15,10 +18,17 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
     "ansi-to-html": "^0.7.2",
+    "commander": "^12.0.0",
     "idb": "^8.0.3",
+    "ink": "^5.2.1",
+    "ink-spinner": "^5.0.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "ws": "^8.20.0"
+  },
+  "overrides": {
+    "commander": "^12.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

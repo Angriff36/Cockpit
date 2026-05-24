@@ -74,6 +74,7 @@ export type DeploymentTarget = {
   domains: string;
   env_source: string;
   notes: string;
+  github_workflow_file: string;
 };
 
 export type EnvKey = {
@@ -338,6 +339,13 @@ export type GitHubWorkflowRun = {
   run_started_at: string | null;
   run_number: number;
   event: string;
+};
+
+export type GitHubWorkflow = {
+  id: number;
+  name: string;
+  path: string;
+  state: string;
 };
 
 export type GitHubRepoStatus = {

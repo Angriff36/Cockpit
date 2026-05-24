@@ -39,7 +39,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     ],
     urls: [],
     deployments: [
-      { platform: 'vercel', platform_project_id: '', platform_project_name: '', team_or_org: '', environment: 'production', branch: 'main', region: '', deploy_command: '', build_command: 'npm run build', production_url: '', preview_url_pattern: '', dashboard_url: '', logs_url: '', domains: '', env_source: 'vercel', notes: '' },
+      { platform: 'vercel', platform_project_id: '', platform_project_name: '', team_or_org: '', environment: 'production', branch: 'main', region: '', deploy_command: '', build_command: 'npm run build', production_url: '', preview_url_pattern: '', dashboard_url: '', logs_url: '', github_workflow_file: '', domains: '', env_source: 'vercel', notes: '' },
     ],
     docker: [],
   },
@@ -99,7 +99,7 @@ export const PROJECT_TEMPLATES: ProjectTemplate[] = [
     ],
     urls: [],
     deployments: [
-      { platform: 'vercel', platform_project_id: '', platform_project_name: '', team_or_org: '', environment: 'production', branch: 'main', region: '', deploy_command: '', build_command: 'npm run build', production_url: '', preview_url_pattern: '', dashboard_url: '', logs_url: '', domains: '', env_source: 'vercel', notes: '' },
+      { platform: 'vercel', platform_project_id: '', platform_project_name: '', team_or_org: '', environment: 'production', branch: 'main', region: '', deploy_command: '', build_command: 'npm run build', production_url: '', preview_url_pattern: '', dashboard_url: '', logs_url: '', github_workflow_file: '', domains: '', env_source: 'vercel', notes: '' },
     ],
     docker: [],
   },

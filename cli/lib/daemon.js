@@ -108,7 +108,7 @@ function probeInfisicalRef(ref) {
       return;
     }
 
-    const args = ['secrets', 'list', '--silent'];
+    const args = ['secrets', '--silent'];
     if (ref.environment) args.push('--env', ref.environment);
     if (ref.secret_path) args.push('--path', ref.secret_path);
     if (ref.infisical_project_id) args.push('--projectId', ref.infisical_project_id);

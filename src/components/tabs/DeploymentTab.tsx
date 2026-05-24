@@ -7,6 +7,7 @@ import { detectProject, triggerDeploy, stopProcess, listProcesses, streamLogs, t
 import { useDaemonOnline } from '../../lib/useDaemonOnline';
 import { Card, CardHeader, Field, Input, Select, Button, Badge, Textarea } from '../ui';
 import { UrlField, UrlInputRow } from '../ExternalLink';
+import { GitHubDeployButton } from '../GitHubDeployButton';
 import { ansiToHtml } from '../../lib/ansi';
 import { JsonImportPanel } from '../JsonImportPanel';
 
@@ -25,6 +26,7 @@ const DEPLOYMENT_TEMPLATE = [
     preview_url_pattern: 'https://my-app-{{branch}}.vercel.app',
     dashboard_url: 'https://vercel.com/dashboard',
     logs_url: '',
+    github_workflow_file: 'deploy.yml',
     domains: 'my-app.com, www.my-app.com',
     env_source: '',
     notes: '',
@@ -92,6 +94,7 @@ function statusBadge(status: DeployStatus) {
 
 function DeploymentRow({
   d: initial,
+  project,
   slug,
   repoPath,
   projectId,
@@ -103,6 +106,7 @@ function DeploymentRow({
   onHistoryChange,
 }: {
   d: DeploymentTarget;
+  project: ProjectScope['project'];
   slug: string;
   repoPath: string;
   projectId: string;
@@ -202,6 +206,7 @@ function DeploymentRow({
   }
 
   const canDeploy = daemonOnline && !!d.deploy_command;
+  const canGitHubDeploy = !!project.repo_url?.includes('github.com') && d.platform === 'vercel';
 
   return (
     <div className="bg-slate-950 border border-slate-800 rounded-lg overflow-hidden">
@@ -220,15 +225,25 @@ function DeploymentRow({
                 <Square className="w-3 h-3 inline mr-1" />Stop
               </Button>
             ) : (
-              canDeploy && (
-                <Button disabled={busy} onClick={handleDeploy}>
-                  {busy
-                    ? <Loader2 className="w-3 h-3 inline mr-1 animate-spin" />
-                    : <Rocket className="w-3 h-3 inline mr-1" />
-                  }
-                  Deploy
-                </Button>
-              )
+              <>
+                {canGitHubDeploy && (
+                  <GitHubDeployButton
+                    scope={{ project, deployments: [d] }}
+                    deployment={d}
+                    onDeployed={onHistoryChange}
+                    compact
+                  />
+                )}
+                {canDeploy && (
+                  <Button disabled={busy} onClick={handleDeploy}>
+                    {busy
+                      ? <Loader2 className="w-3 h-3 inline mr-1 animate-spin" />
+                      : <Rocket className="w-3 h-3 inline mr-1" />
+                    }
+                    Local
+                  </Button>
+                )}
+              </>
             )}
             {(proc || showLogs) && (
               <Button variant="ghost" title="Toggle deploy logs" onClick={() => setShowLogs(v => !v)}>
@@ -263,6 +278,7 @@ function DeploymentRow({
             <UrlInputRow value={d.logs_url} onChange={e => setD({ ...d, logs_url: e.target.value })} onBlur={save} openLabel="Open logs" />
           </UrlField>
           <div className="col-span-6"><Field label="Deploy command"><Input className="font-mono" value={d.deploy_command} onChange={e => setD({ ...d, deploy_command: e.target.value })} onBlur={save} placeholder="vercel --prod" /></Field></div>
+          <div className="col-span-6"><Field label="GitHub workflow file"><Input className="font-mono" value={d.github_workflow_file ?? ''} onChange={e => setD({ ...d, github_workflow_file: e.target.value })} onBlur={save} placeholder="deploy.yml (optional, auto-detect if empty)" /></Field></div>
           <div className="col-span-6"><Field label="Build command"><Input className="font-mono" value={d.build_command} onChange={e => setD({ ...d, build_command: e.target.value })} onBlur={save} /></Field></div>
           <div className="col-span-12"><Field label="Domains"><Input value={d.domains} onChange={e => setD({ ...d, domains: e.target.value })} onBlur={save} placeholder="app.example.com, www.example.com" /></Field></div>
           <div className="col-span-12"><Field label="Notes"><Textarea rows={2} value={d.notes} onChange={e => setD({ ...d, notes: e.target.value })} onBlur={save} /></Field></div>
@@ -433,6 +449,7 @@ export function DeploymentTab({ scope, onChange }: { scope: ProjectScope; onChan
         preview_url_pattern: t.preview_url_pattern?.trim() || '',
         dashboard_url: t.dashboard_url?.trim() || '',
         logs_url: t.logs_url?.trim() || '',
+        github_workflow_file: t.github_workflow_file?.trim() || '',
         domains: t.domains?.trim() || '',
         env_source: t.env_source?.trim() || '',
         notes: t.notes?.trim() || '',
@@ -516,7 +533,7 @@ export function DeploymentTab({ scope, onChange }: { scope: ProjectScope; onChan
         <JsonImportPanel
           title="Import Deployment Targets from JSON"
           template={DEPLOYMENT_TEMPLATE}
-          schemaHint={'Required: platform\nOptional: environment, branch, region, platform_project_id, platform_project_name, team_or_org, deploy_command, build_command, production_url, preview_url_pattern, dashboard_url, logs_url, domains, env_source, notes'}
+          schemaHint={'Required: platform\nOptional: environment, branch, region, platform_project_id, platform_project_name, team_or_org, deploy_command, build_command, production_url, preview_url_pattern, dashboard_url, logs_url, github_workflow_file, domains, env_source, notes'}
           onImport={importTargets}
           onClose={() => setImportMode(false)}
         />
@@ -542,6 +559,7 @@ export function DeploymentTab({ scope, onChange }: { scope: ProjectScope; onChan
             <DeploymentRow
               key={d.id}
               d={d}
+              project={scope.project}
               slug={slug}
               repoPath={repoPath}
               projectId={projectId}

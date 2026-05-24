@@ -347,13 +347,13 @@ program
 // ── ldc set ───────────────────────────────────────────────────────────────────
 program
   .command('set <field> <value>')
-  .description('Set a single top-level project field')
-  .option('--slug <slug>', 'Project slug (default: from .ldc file)')
-  .addHelpText('after', `
+  .description(`Set a single top-level project field
+
   Fields: name, slug, description, repo-path, repo-url, package-manager,
           default-branch, monorepo-paths, tags, status, notes,
           danger-notes, hosting-platform
   Example: ldc set repo-url https://github.com/org/repo`)
+  .option('--slug <slug>', 'Project slug (default: from .ldc file)')
   .action(async (field, value, opts) => {
     const sb = getClient();
     const slug = requireSlug(opts);

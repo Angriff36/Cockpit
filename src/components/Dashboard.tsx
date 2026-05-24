@@ -6,7 +6,7 @@ import type { DaemonProcess } from '../lib/daemon';
 import type { DashboardMetrics } from '../lib/api';
 import { useGitHubWorkflows } from '../lib/useGitHubWorkflows';
 import { getActionsUrl } from '../lib/github';
-import { ExternalHref } from './ExternalLink';
+import { ExternalHref, PlatformLink } from './ExternalLink';
 import { StaleIndicator, Checkbox, Modal, Button } from './ui';
 import { PortConflictPanel } from './PortConflictPanel';
 import { TagManagementPanel } from './TagManagementPanel';
@@ -236,9 +236,11 @@ function ProjectCard({
             </span>
           )}
           {project.hosting_platform && (
-            <span className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}>
-              {PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
-            </span>
+            <PlatformLink
+              platform={project.hosting_platform}
+              label={PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
+              className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}
+            />
           )}
         </div>
       </div>
@@ -432,9 +434,11 @@ function ProjectListRow({
       {/* Platform */}
       <div className="w-20 shrink-0 hidden lg:block">
         {project.hosting_platform && (
-          <span className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}>
-            {PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
-          </span>
+          <PlatformLink
+            platform={project.hosting_platform}
+            label={PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
+            className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}
+          />
         )}
       </div>
 
@@ -741,9 +745,11 @@ function LayoutProjectCard({
             </span>
           )}
           {project.hosting_platform && !isCompact && (
-            <span className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}>
-              {PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
-            </span>
+            <PlatformLink
+              platform={project.hosting_platform}
+              label={PLATFORM_LABEL[project.hosting_platform] || project.hosting_platform}
+              className={`text-[10px] font-semibold uppercase tracking-wider border rounded px-1.5 py-0.5 ${platformStyle}`}
+            />
           )}
         </div>
       </div>

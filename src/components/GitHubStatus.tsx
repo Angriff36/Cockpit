@@ -106,9 +106,9 @@ export function GitHubStatus() {
               {saving ? 'Validating…' : 'Save token'}
             </button>
             <p className="text-[10px] text-slate-600 leading-relaxed">
-              Needs <code className="font-mono">repo</code> and <code className="font-mono">read:user</code> scopes.{' '}
+              Needs <code className="font-mono">repo</code>, <code className="font-mono">workflow</code>, and <code className="font-mono">read:user</code> scopes.{' '}
               <a
-                href="https://github.com/settings/tokens/new?scopes=repo,read:user&description=cockpit"
+                href="https://github.com/settings/tokens/new?scopes=repo,workflow,read:user&description=cockpit"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-500 hover:text-slate-300 underline"

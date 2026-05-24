@@ -141,6 +141,13 @@ export type DetectResult = {
   env_keys: Array<{ key_name: string; classification: string }>;
   deployments: Array<{ platform: string; environment: string; production_url?: string }>;
   docker: Array<{ compose_file_path: string; services: string }>;
+  infisical_refs: Array<{
+    infisical_project_id: string;
+    environment: string;
+    secret_path: string;
+    run_command_pattern: string;
+    notes?: string;
+  }>;
 };
 
 export async function detectProject(cwd: string): Promise<DetectResult> {
