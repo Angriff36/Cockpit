@@ -1,0 +1,26 @@
+[mcp_servers."capsule-pro"]
+type = "stdio"
+command = "npx"
+args = ["tsx", "--require", "C:\\Projects\\capsule-pro\\packages\\mcp-server\\src\\preload.cts", "C:\\Projects\\capsule-pro\\packages\\mcp-server\\src\\index.ts"]
+env = { MCP_PROJECT_ROOT = "C:\\Projects\\capsule-pro" }
+
+[mcp_servers."capsule-pro-admin"]
+type = "stdio"
+command = "npx"
+args = ["tsx", "--require", "C:\\Projects\\capsule-pro\\packages\\mcp-server\\src\\preload.cts", "C:\\Projects\\capsule-pro\\packages\\mcp-server\\src\\index.ts"]
+env = { MCP_SERVER_MODE = "admin", MCP_PROJECT_ROOT = "C:\\Projects\\capsule-pro" }
+
+[mcp_servers."atomicviz"]
+type = "stdio"
+command = "npx"
+args = ["tsx", "C:\\Projects\\code_analysis\\Code-Analysis\\mcp-server\\index.ts"]
+
+[mcp_servers."chrome-devtools"]
+type = "stdio"
+command = "cmd"
+args = ["/c", "npx", "chrome-devtools-mcp@latest", "--autoConnect"]
+
+[mcp_servers."task-orchestrator"]
+type = "stdio"
+command = "docker"
+args = ["run", "--rm", "-i", "--volume", "mcp-task-data:/app/data", "--volume", "C:/Projects:/projects", "--env", "AGENT_CONFIG_DIR=/projects", "ghcr.io/jpicklyk/task-orchestrator:latest"]

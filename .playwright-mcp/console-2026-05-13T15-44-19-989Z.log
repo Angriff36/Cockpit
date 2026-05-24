@@ -1,0 +1,44 @@
+[    4661ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/react-dom_client.js?v=1b5f37b6:21550
+[    5254ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5174/:0
+[ 1233461ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5174/@vite/client:559
+[ 1237551ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/react-dom_client.js?v=7834c8d6:21550
+[ 1238057ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5174/:0
+[ 1717848ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5174/:0
+[ 1984289ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 1992071ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 1992847ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 1993770ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 1994756ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2009522ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2009594ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2028443ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2029306ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2037394ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2107254ms] [LOG] Daemon directory set to: C:\Projects\jobflow @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:110
+[ 2107254ms] [LOG] Scan complete: No new items found @ http://localhost:5174/src/components/ProjectView.tsx?t=1778688703406:214
+[ 2572574ms] [LOG] Daemon directory set to: c:/projects/capsule-pro @ http://localhost:5174/src/components/ProjectView.tsx?t=1778689632224:110
+[ 4318332ms] [LOG] Daemon directory set to: c:/projects/capsule-pro @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691378095:110
+[ 4375055ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) %o @ http://localhost:5174/:0
+[ 4381420ms] [LOG] Daemon directory set to: c:/projects/capsule-pro @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691378095:110
+[ 4400517ms] [LOG] Daemon directory set to: c:/projects/capsule-pro @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691378095:110
+[ 4402439ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/react-dom_client.js?v=7834c8d6:21550
+[ 4422160ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4422251ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4428288ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4428337ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4428337ms] [LOG] Scan complete: Added 2 ports, 1 env keys, 1 Docker configs @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:212
+[ 4434596ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4435701ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4437109ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4441038ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4441259ms] [LOG] Daemon directory set to: C:\containers\agent-vault @ http://localhost:5174/src/components/ProjectView.tsx?t=1778691384433:110
+[ 4449603ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:7891/docker-compose:0
+[ 4449603ms] [ERROR] Daemon request failed: /docker-compose Error: not found
+    at req (http://localhost:5174/src/lib/daemon.ts?t=1778689632224:12:13)
+    at async runAction (http://localhost:5174/src/components/tabs/DockerTab.tsx?t=1778691384433:60:25) @ http://localhost:5174/src/lib/daemon.ts?t=1778689632224:15
+[ 4456202ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:7891/docker-compose:0
+[ 4456203ms] [ERROR] Daemon request failed: /docker-compose Error: not found
+    at req (http://localhost:5174/src/lib/daemon.ts?t=1778689632224:12:13)
+    at async runAction (http://localhost:5174/src/components/tabs/DockerTab.tsx?t=1778691384433:60:25) @ http://localhost:5174/src/lib/daemon.ts?t=1778689632224:15
+[ 4768031ms] [LOG] [vite] server connection lost. Polling for restart... @ http://localhost:5174/@vite/client:559
+[ 4771519ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ http://localhost:5174/node_modules/.vite/deps/react-dom_client.js?v=a9fba3e1:21550
